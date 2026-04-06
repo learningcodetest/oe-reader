@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>The Otherness of English</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📖</text></svg>">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -22,6 +23,7 @@
 
   <!-- Header -->
   <header class="header">
+    <div class="progress-bar" id="progress-bar"></div>
     <div class="header-inner">
       <a href="#" class="logo" id="logo-link">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/></svg>
@@ -30,7 +32,7 @@
       <div class="header-actions">
         <button class="search-trigger" id="search-trigger" aria-label="Search">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-          <span class="search-shortcut">⌘K</span>
+          <span class="search-shortcut" id="search-shortcut">Ctrl+K</span>
         </button>
         <button class="theme-toggle" id="theme-toggle" aria-label="Toggle theme">
           <svg class="icon-sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
@@ -45,6 +47,7 @@
     <div class="library-header">
       <h1>The Otherness of English</h1>
       <p class="subtitle">India's Auntie Tongue Syndrome — Probal Dasgupta</p>
+      <p class="book-desc">An exploration of what the English language means in post-colonial India — its role in education, identity, and the tension between modernity and indigenous traditions.</p>
     </div>
     <div class="parts-list" id="parts-list"></div>
   </main>
@@ -52,6 +55,10 @@
   <!-- Reader view -->
   <main id="reader" class="container hidden">
     <aside class="toc" id="toc">
+      <button class="toc-toggle" id="toc-toggle" aria-label="Toggle table of contents">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        <span>Contents</span>
+      </button>
       <nav id="toc-nav"></nav>
     </aside>
     <article class="reader-content" id="reader-content"></article>
@@ -62,7 +69,7 @@
     <div class="search-modal">
       <div class="search-input-wrap">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-        <input type="text" id="search-input" placeholder="Search across all parts..." autocomplete="off" spellcheck="false">
+        <input type="text" id="search-input" placeholder="Search across all chapters..." autocomplete="off" spellcheck="false">
         <kbd>Esc</kbd>
       </div>
       <div class="search-results" id="search-results">
@@ -70,6 +77,11 @@
       </div>
     </div>
   </div>
+
+  <!-- Back to top -->
+  <button class="back-to-top" id="back-to-top" aria-label="Back to top">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"/></svg>
+  </button>
 
   <script src="app.js"></script>
 </body>

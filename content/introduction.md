@@ -102,9 +102,26 @@ But that, for good or ill, is not how we proceed. Our basic object of inquiry is
 
 Once upon a time, there was a nationalist movement in Bengal, in response to the decision by the British to partition the province of Bengal along communal lines in 1905. Two teenaged enthusiasts who joined the movement, called Khudiram and Abhiram, were treated in ways that shook the faith of many loyal imperial subjects in the proverbial impartiality of British law, a legal system which was supposed to re-educate juvenile offenders instead of killing or exiling them. Khudiram was hanged and Abhiram exiled to the Andamans. Out of this shaken faith came one of the many nationalist songs that continue to form the core of Bengal's musical archive of political awareness.
 
-Ekbar bidaY de ma ghure aSi ami haSi haSi porbo phaMSi dekhbe bharotbaSi kOler boma toyri kore daMRiechilam rastar dhare ma go bORolaTke marte gie marlam arek inglOnDbaSi
+Ekbar bidaY de ma ghure aSi
+ami haSi haSi porbo phaMSi
+dekhbe bharotbaSi
+kOler boma toyri kore
+daMRiechilam rastar dhare
+ma go bORolaTke marte gie
+marlam arek inglOnDbaSi
 
-Sonibar bEla dOSTar pOre jO korTete lok na dhOre ma go holo obhiramer dipantor ma khudiramer phaMSi baro lokkho tettriS koTi roylo ma tor bETa beTi ma go tader nie ghOr koriS ma bowder koriS daSi dOS maS dOS diner pOre jOnmo nebo maSir ghOre ma go o ma tOkhon jodi na cinte pariS dekhbi gOlar phaMSi
+Sonibar bEla dOSTar pOre
+jO korTete lok na dhOre
+ma go holo obhiramer dipantor
+ma khudiramer phaMSi
+baro lokkho tettriS koTi
+roylo ma tor bETa beTi
+ma go tader nie ghOr koriS
+ma bowder koriS daSi
+dOS maS dOS diner pOre
+jOnmo nebo maSir ghOre
+ma go o ma tOkhon jodi na cinte pariS
+dekhbi gOlar phaMSi
 
 Say goodbye, mother, let me go.
 

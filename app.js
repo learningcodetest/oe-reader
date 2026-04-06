@@ -9,6 +9,7 @@ const CHAPTERS = [
   { id: "india-bharat",           file: "india-bharat.md",            title: "India / Bharat",              label: "Chapter 5" },
   { id: "conclusion",             file: "conclusion.md",              title: "Conclusion",                  label: "Chapter 6" },
   { id: "references",             file: "references.md",              title: "References",                  label: "References" },
+  { id: "glossary",               file: "glossary.md",                title: "Glossary",                    label: "Glossary" },
 ];
 
 // === State ===
@@ -33,6 +34,32 @@ document.getElementById("theme-toggle").addEventListener("click", () => {
   document.documentElement.setAttribute("data-theme", next);
   localStorage.setItem("theme", next);
 });
+
+// === Mobile TOC toggle ===
+const tocToggle = document.getElementById("toc-toggle");
+const tocEl = document.getElementById("toc");
+tocToggle.addEventListener("click", () => {
+  tocEl.classList.toggle("open");
+  tocToggle.setAttribute("aria-expanded", tocEl.classList.contains("open"));
+});
+
+// === Platform-aware shortcut label ===
+if (navigator.platform.indexOf("Mac") > -1 || navigator.userAgent.indexOf("Mac") > -1) {
+  document.getElementById("search-shortcut").textContent = "⌘K";
+}
+
+// === Reading progress bar & back-to-top ===
+const progressBar = document.getElementById("progress-bar");
+const backToTop = document.getElementById("back-to-top");
+window.addEventListener("scroll", () => {
+  if (!currentChapter) { progressBar.style.width = "0"; backToTop.classList.remove("visible"); return; }
+  const scrollTop = window.scrollY;
+  const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+  const pct = docHeight > 0 ? Math.min(100, (scrollTop / docHeight) * 100) : 0;
+  progressBar.style.width = pct + "%";
+  backToTop.classList.toggle("visible", scrollTop > 400);
+});
+backToTop.addEventListener("click", () => window.scrollTo({ top: 0, behavior: "smooth" }));
 
 // === Lightweight Markdown → HTML ===
 function slugify(text) {
@@ -109,9 +136,16 @@ function parseMarkdown(md) {
       continue;
     }
 
-    // Regular paragraph line
+    // Regular paragraph line — detect glossary [category] tags
     flushBlockquote();
-    currentSection.html += `<p>${inlineFormat(line)}</p>`;
+    const tagMatch = line.match(/\[(\w+)\]\s*$/);
+    if (tagMatch) {
+      const category = tagMatch[1];
+      const cleanLine = line.replace(/\s*\[\w+\]\s*$/, "");
+      currentSection.html += `<p data-category="${category}">${inlineFormat(cleanLine)}</p>`;
+    } else {
+      currentSection.html += `<p>${inlineFormat(line)}</p>`;
+    }
   }
 
   flushBlockquote();
@@ -137,12 +171,13 @@ async function fetchChapter(id) {
 }
 
 // === Library ===
-function renderLibrary() {
+async function renderLibrary() {
   const list = document.getElementById("parts-list");
   list.innerHTML = CHAPTERS.map(ch => `
     <a class="part-row" href="#${ch.id}" data-chapter="${ch.id}">
       <span class="part-row-label">${escapeHtml(ch.label)}</span>
       <span class="part-row-title">${escapeHtml(ch.title)}</span>
+      <span class="part-row-time" data-time-for="${ch.id}"></span>
     </a>
   `).join("");
 
@@ -152,6 +187,16 @@ function renderLibrary() {
       openChapter(row.dataset.chapter);
     });
   });
+
+  // Populate read times asynchronously
+  for (const ch of CHAPTERS) {
+    fetchChapter(ch.id).then(data => {
+      if (!data) return;
+      const mins = Math.max(1, Math.round(data.wordCount / 200));
+      const el = list.querySelector(`[data-time-for="${ch.id}"]`);
+      if (el) el.textContent = `~${mins} min`;
+    });
+  }
 }
 
 // === Reader ===
@@ -188,12 +233,55 @@ async function openChapter(chapterId, sectionId) {
     showLibrary();
   });
 
+  // Close mobile TOC when a link is tapped
+  tocNav.querySelectorAll(".toc-link").forEach(link => {
+    link.addEventListener("click", () => tocEl.classList.remove("open"));
+  });
+
   // Render content
   const content = document.getElementById("reader-content");
   const sectionsHtml = chapter.sections.map(s => {
     const heading = s.title ? `<h2 id="section-${s.id}">${escapeHtml(s.title)}</h2>` : "";
     return heading + s.html;
   }).join("");
+
+  // Glossary filter bar with counts and inline search
+  const GLOSSARY_CATEGORIES = {
+    all: "All",
+    term: "Terms",
+    scholar: "Scholars & Figures",
+    place: "Places",
+    language: "Languages",
+    linguistics: "Linguistics",
+    culture: "Culture & Politics"
+  };
+
+  let filterHtml = "";
+  if (chapterId === "glossary") {
+    // Count entries per category from the rendered HTML
+    const tempDiv = document.createElement("div");
+    tempDiv.innerHTML = sectionsHtml;
+    const allEntries = tempDiv.querySelectorAll("p[data-category]");
+    const counts = { all: allEntries.length };
+    allEntries.forEach(p => {
+      const cat = p.dataset.category;
+      counts[cat] = (counts[cat] || 0) + 1;
+    });
+
+    filterHtml = `
+      <div class="glossary-toolbar">
+        <div class="glossary-search-wrap">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input type="text" class="glossary-search" id="glossary-search" placeholder="Filter glossary..." autocomplete="off" spellcheck="false">
+        </div>
+        <div class="glossary-filters" id="glossary-filters">
+          ${Object.entries(GLOSSARY_CATEGORIES).map(([key, label]) =>
+            `<button class="filter-btn${key === 'all' ? ' active' : ''}" data-filter="${key}">${label}<span class="filter-count">${counts[key] || 0}</span></button>`
+          ).join("")}
+        </div>
+      </div>
+    `;
+  }
 
   const navHtml = `
     <nav class="chapter-nav">
@@ -210,9 +298,53 @@ async function openChapter(chapterId, sectionId) {
 
   content.innerHTML = `
     <h1>${escapeHtml(chapter.title)}</h1>
+    ${filterHtml}
     ${sectionsHtml}
     ${navHtml}
   `;
+
+  // Wire up glossary filters and search
+  if (chapterId === "glossary") {
+    const glossaryEntries = content.querySelectorAll("p[data-category]");
+    const glossaryHeadings = content.querySelectorAll("h2[id]");
+    let activeFilter = "all";
+
+    function applyGlossaryFilters() {
+      const searchVal = (document.getElementById("glossary-search")?.value || "").toLowerCase().trim();
+      glossaryEntries.forEach(p => {
+        const matchesCategory = activeFilter === "all" || p.dataset.category === activeFilter;
+        const matchesSearch = !searchVal || p.textContent.toLowerCase().includes(searchVal);
+        p.style.display = (matchesCategory && matchesSearch) ? "" : "none";
+      });
+      glossaryHeadings.forEach(h2 => {
+        let el = h2.nextElementSibling;
+        let anyVisible = false;
+        while (el && el.tagName !== "H2") {
+          if (el.tagName === "P" && el.dataset.category && el.style.display !== "none") anyVisible = true;
+          el = el.nextElementSibling;
+        }
+        h2.style.display = anyVisible ? "" : "none";
+      });
+    }
+
+    content.querySelectorAll(".filter-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        content.querySelectorAll(".filter-btn").forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+        activeFilter = btn.dataset.filter;
+        applyGlossaryFilters();
+      });
+    });
+
+    const glossarySearchInput = document.getElementById("glossary-search");
+    if (glossarySearchInput) {
+      let gsTimeout;
+      glossarySearchInput.addEventListener("input", () => {
+        clearTimeout(gsTimeout);
+        gsTimeout = setTimeout(applyGlossaryFilters, 100);
+      });
+    }
+  }
 
   // Wire up chapter nav links
   content.querySelectorAll(".chapter-nav-link").forEach(link => {
@@ -275,6 +407,10 @@ async function buildSearchIndex() {
     const data = await fetchChapter(ch.id);
     if (!data) continue;
     for (const sec of data.sections) {
+      // Index section headings as standalone search results
+      if (sec.title) {
+        searchIndex.push({ chapterId: ch.id, chapterTitle: ch.title, label: ch.label, sectionId: sec.id, sectionTitle: sec.title, text: sec.title, isHeading: true });
+      }
       // Strip HTML tags for search text
       const text = sec.html.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
       if (!text) continue;
@@ -351,10 +487,11 @@ function performSearch(query) {
 
   searchResults.innerHTML = results.map(r => {
     const highlighted = highlightText(r.text, terms);
+    const icon = r.isHeading ? `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;opacity:0.5"><path d="M4 12h8"/><path d="M4 18V6"/><path d="M12 18V6"/><path d="M21 12h-4"/></svg> ` : "";
     return `
-      <div class="search-result" data-chapter="${r.chapterId}" data-section="${r.sectionId}">
+      <div class="search-result${r.isHeading ? ' search-result-heading' : ''}" data-chapter="${r.chapterId}" data-section="${r.sectionId}">
         <div class="search-result-meta">${escapeHtml(r.label)} · ${escapeHtml(r.chapterTitle)}${r.sectionTitle ? " · " + escapeHtml(r.sectionTitle) : ""}</div>
-        <div class="search-result-text">${highlighted}</div>
+        <div class="search-result-text">${icon}${highlighted}</div>
       </div>
     `;
   }).join("");
